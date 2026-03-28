@@ -26,6 +26,7 @@ export function buildPreview(code: string, framework: Framework): string {
 <body>
   <div id="root"></div>
   <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback, useMemo, useReducer, useContext, createContext } = React;
     ${cleanCode}
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
