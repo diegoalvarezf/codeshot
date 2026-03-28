@@ -122,39 +122,48 @@ export default function Home() {
 
   if (!unlocked) {
     return (
-      <div className="flex flex-col h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
-        <form onSubmit={handleAccess} className="flex flex-col items-center gap-5 w-full max-w-xs px-6">
-          <span className="font-mono font-bold text-lg" style={{ color: "#00e5ff" }}>codeshot</span>
-          <p className="text-xs text-center" style={{ color: "#555" }}>Enter your access code to continue</p>
-          <input
-            autoFocus
-            type="password"
-            value={accessCode}
-            onChange={(e) => { setAccessCode(e.target.value); setAccessError(false); }}
-            placeholder="Access code"
-            className="w-full text-sm px-3 py-2 rounded outline-none text-center"
-            style={{
-              background: "#141414",
-              border: `1px solid ${accessError ? "#ff4444" : "#252525"}`,
-              color: "#e5e5e5",
-              fontFamily: "inherit",
-            }}
-          />
-          {accessError && <p className="text-xs" style={{ color: "#ff4444" }}>Invalid code</p>}
-          <button
-            type="submit"
-            disabled={!accessCode.trim()}
-            className="w-full py-2 rounded text-sm font-medium transition-all"
-            style={{
-              background: accessCode.trim() ? "#00e5ff22" : "#1a1a1a",
-              color: accessCode.trim() ? "#00e5ff" : "#444",
-              border: `1px solid ${accessCode.trim() ? "#00e5ff55" : "#252525"}`,
-              cursor: accessCode.trim() ? "pointer" : "not-allowed",
-            }}
-          >
-            Unlock
-          </button>
-        </form>
+      <div className="relative flex flex-col h-screen overflow-hidden">
+        {/* App UI in background */}
+        <AppShell framework="react" />
+
+        {/* Overlay */}
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backdropFilter: "blur(6px)", background: "rgba(10,10,10,0.7)" }}
+        >
+          <form onSubmit={handleAccess} className="flex flex-col items-center gap-5 w-full max-w-xs px-6">
+            <span className="font-mono font-bold text-lg" style={{ color: "#00e5ff" }}>codeshot</span>
+            <p className="text-xs text-center" style={{ color: "#888" }}>Enter your access code to continue</p>
+            <input
+              autoFocus
+              type="password"
+              value={accessCode}
+              onChange={(e) => { setAccessCode(e.target.value); setAccessError(false); }}
+              placeholder="Access code"
+              className="w-full text-sm px-3 py-2 rounded outline-none text-center"
+              style={{
+                background: "#141414",
+                border: `1px solid ${accessError ? "#ff4444" : "#252525"}`,
+                color: "#e5e5e5",
+                fontFamily: "inherit",
+              }}
+            />
+            {accessError && <p className="text-xs" style={{ color: "#ff4444" }}>Invalid code</p>}
+            <button
+              type="submit"
+              disabled={!accessCode.trim()}
+              className="w-full py-2 rounded text-sm font-medium transition-all"
+              style={{
+                background: accessCode.trim() ? "#00e5ff22" : "#1a1a1a",
+                color: accessCode.trim() ? "#00e5ff" : "#444",
+                border: `1px solid ${accessCode.trim() ? "#00e5ff55" : "#252525"}`,
+                cursor: accessCode.trim() ? "pointer" : "not-allowed",
+              }}
+            >
+              Unlock
+            </button>
+          </form>
+        </div>
       </div>
     );
   }
@@ -357,6 +366,68 @@ export default function Home() {
                 )}
               </div>
             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AppShell({ framework }: { framework: Framework }) {
+  const fw = FRAMEWORKS.find((f) => f.id === framework)!;
+  return (
+    <div className="flex flex-col h-screen overflow-hidden" style={{ pointerEvents: "none", userSelect: "none" }}>
+      <header className="flex items-center justify-between px-5 h-12 border-b shrink-0" style={{ borderColor: "#1e1e1e", background: "#0d0d0d" }}>
+        <div className="flex items-center gap-3">
+          <span className="font-mono font-bold text-sm" style={{ color: "#00e5ff" }}>codeshot</span>
+          <span className="text-xs" style={{ color: "#444" }}>/</span>
+          <div className="flex items-center gap-1">
+            {FRAMEWORKS.map((f) => (
+              <span
+                key={f.id}
+                className="px-3 py-1 text-xs font-medium rounded"
+                style={{
+                  background: f.id === framework ? f.color + "18" : "transparent",
+                  color: f.id === framework ? f.color : "#666",
+                  border: `1px solid ${f.id === framework ? f.color + "44" : "transparent"}`,
+                }}
+              >
+                {f.label}
+              </span>
+            ))}
+          </div>
+        </div>
+        <span className="text-xs" style={{ color: "#444" }}>GitHub ↗</span>
+      </header>
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col w-full md:w-[380px] shrink-0 border-r" style={{ borderColor: "#1e1e1e" }}>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col items-center justify-center text-center px-8 gap-3">
+            <div className="text-2xl font-mono font-bold" style={{ color: fw.color }}>&gt;_</div>
+            <p className="text-sm" style={{ color: "#555" }}>
+              Describe what you want to build in <span style={{ color: fw.color }}>{fw.label}</span>{" "}and I&apos;ll generate the code.
+            </p>
+            <div className="flex flex-col gap-2 w-full mt-2">
+              {suggestions[framework].map((s) => (
+                <div key={s} className="text-left text-xs px-3 py-2 rounded" style={{ background: "#141414", color: "#555", border: "1px solid #1e1e1e" }}>
+                  {s}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="p-3 border-t" style={{ borderColor: "#1e1e1e" }}>
+            <div className="flex gap-2 items-end">
+              <div className="flex-1 h-[56px] rounded" style={{ background: "#141414", border: "1px solid #252525" }} />
+              <div className="px-3 py-2 rounded text-sm" style={{ background: "#1a1a1a", color: "#444", border: "1px solid #252525" }}>→</div>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex items-center gap-1 px-4 h-10 border-b shrink-0" style={{ borderColor: "#1e1e1e", background: "#0d0d0d" }}>
+            <span className="px-3 py-1 text-xs font-medium rounded" style={{ background: "#1e1e1e", color: "#e5e5e5" }}>code</span>
+            <span className="px-3 py-1 text-xs font-medium rounded" style={{ color: "#555" }}>preview</span>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-sm" style={{ color: "#333" }}>Code will appear here</p>
           </div>
         </div>
       </div>
