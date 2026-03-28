@@ -85,14 +85,17 @@ export default function Home() {
           const data = line.slice(6);
           if (data === "[DONE]") break;
 
+          let parsed: { text?: string; error?: string };
           try {
-            const parsed = JSON.parse(data);
-            if (parsed.error) throw new Error(parsed.error);
-            if (parsed.text) {
-              fullText += parsed.text;
-              setStreamingText(fullText);
-            }
-          } catch {}
+            parsed = JSON.parse(data);
+          } catch {
+            continue;
+          }
+          if (parsed.error) throw new Error(parsed.error);
+          if (parsed.text) {
+            fullText += parsed.text;
+            setStreamingText(fullText);
+          }
         }
       }
 
