@@ -7,7 +7,13 @@ import { extractCode, buildPreview } from "@/lib/preview";
 
 type Tab = "code" | "preview";
 
+const ACCESS_KEY = "codeshot_access";
+
 export default function Home() {
+  const [unlocked, setUnlocked] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
+  const [accessError, setAccessError] = useState(false);
+
   const [framework, setFramework] = useState<Framework>("react");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -19,8 +25,28 @@ export default function Home() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    if (localStorage.getItem(ACCESS_KEY) === "1") setUnlocked(true);
+  }, []);
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
+
+  const handleAccess = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAccessError(false);
+    const res = await fetch("/api/access", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: accessCode }),
+    });
+    if (res.ok) {
+      localStorage.setItem(ACCESS_KEY, "1");
+      setUnlocked(true);
+    } else {
+      setAccessError(true);
+    }
+  };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -40,6 +66,7 @@ export default function Home() {
         body: JSON.stringify({ messages: newMessages, framework }),
       });
 
+      if (res.status === 429) throw new Error("Rate limit exceeded. Try again in an hour.");
       if (!res.ok || !res.body) throw new Error("Request failed");
 
       const reader = res.body.getReader();
@@ -92,6 +119,45 @@ export default function Home() {
 
   const previewHtml = code ? buildPreview(code, framework) : "";
   const fw = FRAMEWORKS.find((f) => f.id === framework)!;
+
+  if (!unlocked) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center" style={{ background: "#0a0a0a" }}>
+        <form onSubmit={handleAccess} className="flex flex-col items-center gap-5 w-full max-w-xs px-6">
+          <span className="font-mono font-bold text-lg" style={{ color: "#00e5ff" }}>codeshot</span>
+          <p className="text-xs text-center" style={{ color: "#555" }}>Enter your access code to continue</p>
+          <input
+            autoFocus
+            type="password"
+            value={accessCode}
+            onChange={(e) => { setAccessCode(e.target.value); setAccessError(false); }}
+            placeholder="Access code"
+            className="w-full text-sm px-3 py-2 rounded outline-none text-center"
+            style={{
+              background: "#141414",
+              border: `1px solid ${accessError ? "#ff4444" : "#252525"}`,
+              color: "#e5e5e5",
+              fontFamily: "inherit",
+            }}
+          />
+          {accessError && <p className="text-xs" style={{ color: "#ff4444" }}>Invalid code</p>}
+          <button
+            type="submit"
+            disabled={!accessCode.trim()}
+            className="w-full py-2 rounded text-sm font-medium transition-all"
+            style={{
+              background: accessCode.trim() ? "#00e5ff22" : "#1a1a1a",
+              color: accessCode.trim() ? "#00e5ff" : "#444",
+              border: `1px solid ${accessCode.trim() ? "#00e5ff55" : "#252525"}`,
+              cursor: accessCode.trim() ? "pointer" : "not-allowed",
+            }}
+          >
+            Unlock
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
