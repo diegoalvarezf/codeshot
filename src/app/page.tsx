@@ -140,7 +140,7 @@ export default function Home() {
               <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-4">
                 <div className="text-2xl font-mono font-bold" style={{ color: fw.color }}>&gt;_</div>
                 <p className="text-sm" style={{ color: "#555" }}>
-                  Describe what you want to build in <span style={{ color: fw.color }}>{fw.label}</span> and I&apos;ll generate the code.
+                  Describe what you want to build in <span style={{ color: fw.color }}>{fw.label}</span>{" "}and I&apos;ll generate the code.
                 </p>
                 <div className="flex flex-col gap-2 w-full mt-2">
                   {suggestions[framework].map((s) => (
