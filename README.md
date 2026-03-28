@@ -4,8 +4,6 @@ AI code generator with live preview. Describe what you want to build and get wor
 
 **[codeshot-sooty.vercel.app](https://codeshot-sooty.vercel.app)**
 
-![codeshot preview](https://github.com/diegoalvarezf/codeshot/raw/master/public/preview.png)
-
 ## Features
 
 - Generate React, Vue 3, and HTML/CSS/JS components from a prompt
